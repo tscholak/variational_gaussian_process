@@ -8,3 +8,8 @@ css/reveal.min.css
 js/reveal.min.js
 css/reveal.css
 css/theme/tscholak.css
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.pdf
