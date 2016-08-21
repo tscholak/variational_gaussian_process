@@ -136,7 +136,7 @@ $$
 $$
 
 <div style="width: 100%; text-align: center; margin-top: 2em;">
-	<img data-src="assets/Bayesian_network.svg" style="width: 60%; border: 0;">
+	<img data-src="images/Bayesian_network.svg" style="width: 60%; border: 0;">
 </div>
 
 
