@@ -1,7 +1,3 @@
-## Review
-
-
-
 ### What Is Bayesian Inference?
 
 1. **Observe** the phenomenon, gather $\mathbf{X} = \left\\{\mathbf{x}\_i\right\\}\_{i=1}^N$, $\mathbf{x}\_i \in \mathbb{R}^D$.
@@ -76,7 +72,7 @@ $$
 
 
 
-### Conventional Variational Modelling
+### Conventional Variational Modeling
 
 Two conflicting demands:
 <ol style="list-style-type:lower-roman;">
@@ -96,7 +92,7 @@ Two conflicting demands:
 
 
 
-### Hierarchical Variational Modelling
+### Hierarchical Variational Modeling
 
 <ol start="3" style="list-style-type:lower-roman;">
 	<li>
@@ -115,40 +111,211 @@ Expressiveness is determined by the complexity of $q(\mathbf{\lambda}; \mathbf{\
 
 
 
-### Variational Gaussian Process
+### Variational Gaussian Processes I
 
-Let the mean-field parameters be ${\lambda\_{i}} = f\_i(\mathbf{\xi}) \in \mathbb{R}$, $i = 1, \ldots, d$, where
-* the latent input $\mathbf{\xi} \in {\mathbb{R}^{c}}$ is normally distributed, $\mathbf{\xi} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$,
+Let the mean-field parameters be ${\lambda\_{i}} = f\_i(\mathbf{\xi}) \in \mathbb{R}$, $i = 1, \ldots, d$, where:
+* The latent input $\mathbf{\xi} \in {\mathbb{R}^{c}}$ is normally distributed, $\mathbf{\xi} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$.
 
-* the functions $f\_{i} : {\mathbb{R}^{c}} \to \mathbb{R}$ are distributed according to a **Gaussian process**,
+* The functions $f\_{i} : {\mathbb{R}^{c}} \to \mathbb{R}$ are distributed according to a **Gaussian process** (GP),
 $$
-  f\_{i} \sim \left.\mathcal{GP}\left(\mathbf{0}, {\mathbf{K}_{\mathbf{\xi}\mathbf{\xi}}}\right) \,\\! \right| \mathcal{D},
+  f\_{i} \sim \left.\mathcal{GP}\left(\mathbf{0}, {\mathbf{K}}\right) \,\\! \right| \mathbf{\theta},
 $$
-conditioned on a fake data set, $\mathcal{D}$.
+conditioned on a fake data set, $\mathbf{\theta}$, which is not modeled.
+
+Then we draw mean-field samples, i.e. approximate posterior samples $\mathbf{z} \in \mathrm{supp}(p)$, conditioned on the output of the GP draw. 
 
 
-decomposing the vector-valued function into scalar-valued functions
 
-Gaussian process is conditioned on a hypothetical data set.
+### Variational Gaussian Processes II
 
-we have latent inputs into this Gaussian process
+$$
+	\textstyle
+	\begin{aligned}
+		q\_{\,\mathrm{VGP}}^{\;}(\mathbf{z}; \mathbf{\theta}) = \iint & \left[\prod\_{i=1}^d q(z\_i| f\_i(\mathbf{\xi}))\right] \\\\[1.5em] \times & \left[\prod\_{i=1}^d \left.\mathcal{GP}\left(f\_i; \mathbf{0}, {\mathbf{K}}\right) \,\\! \right| \mathbf{\theta}\right] \mathcal{N}(\xi; \mathbf{0}, \mathbf{I}) \, \mathrm{d}\mathbf{f} \, \mathrm{d}\mathbf{\xi} \, .
+	\end{aligned}
+$$
 
-the inputs are into the GP draws
-
-the output of the GP draws are the mean field parameters
-
-the variational Gaussian process is just an ensemble of mean-field distributions, the weights of the individual distributions given by a Bayesian nonparametric prior
-
-evaluation of these GP draws at the same input $\mathbf{\xi}$ induces correlation between the outputs.
-
-the parameters of this VGP are the data itself, because rather than observing data in variable space we are going to imagine a bunch of hypothetical data and we want to learn where to situate these data points, so that they anchor the random nonlinear mappings of the GP draws at certain input-output pairs.
-
-we can also think of this in terms of a generative process:
-1. Draw the latent inputs $\xi$ from a standard normal.
-2. Draw the non-linear mapping conditioned on that fake data set.
-3. Draw mean-field samples, i.e. approximate posterior samples $\mathbf{z} \in \mathrm{supp}(p)$, conditioned on the output of this GP draw. 
+<div style="width: 100%; text-align: center; margin-top: 2em;">
+	<img data-src="assets/Bayesian_network.svg" style="width: 60%; border: 0;">
+</div>
 
 
-### Gaussian Process
 
-given the data $\mathcal{D}$, $p(f| \mathcal{D})$ forms a distribution over mappings $f$ which interpolate between input-output pairs in $\mathcal{D}$.
+### Gaussian Processes
+
+A Gaussian process is a **generalization** of the Gaussian probability distribution, $\mathcal{N}$.
+
+Given data $\mathbf{\theta} = \\{({\mathbf{s}\_j}, {\mathbf{t}\_j})\\}\_j = \\{\mathbf{S}, \mathbf{T}\\}$, with inputs ${\mathbf{s}\_j} \in {\mathbb{R}^c}$ and outputs ${\mathbf{t}\_j} \in {\mathbb{R}^d}$,
+$$
+	p({\mathbf{f}}| {\mathbf{\theta}}) = {\prod\_{i=1}^{d}} \left.\mathcal{GP}\left(f\_i; \mathbf{0}, {\mathbf{K}}\right) \,\\! \right| \mathbf{\theta}
+$$ forms a **distribution over functions** $\mathbf{f} : {\mathbb{R}^{c}} \to {\mathbb{R}^{d}}$ which interpolate between input-output pairs in $\mathbf{\theta}$.
+
+$\mathbf{K}$ is the covariance matrix or **kernel** of the GP.
+
+
+
+### Gaussian Process Kernels
+
+The standard choice is the **automatic relevance determination** kernel,
+$$
+	\mathbf{K}({\mathbf{S}}, {\mathbf{S}}')\_{jj'} = \eta^2 \, \exp\\!\\!\\!\left[- \sum\_{l=1}^c \rho\_l^2 \left(s\_{jl} - s^{\\!\\!\prime}\_{j'l}\right)^2\right] + \delta\_{\mathbf{s}\_j \mathbf{s}'\_{j'}} \sigma^2,
+$$
+where $\delta\_{\mathbf{s}\_j \mathbf{s}'\_{j'}}$ is meant with respect to the identity of the points.
+
+The more similar $\mathbf{s}\_j$ and $\mathbf{s}'\_{j'}$, the more similar $\mathbf{f}(\mathbf{s}\_j)$ and $\mathbf{f}(\mathbf{s}'\_{j'})$.
+
+The larger $\rho\_l$, the larger the weight on dimension $l$.
+
+$\eta$ is the scale of the outputs $\mathbf{T}$.
+
+$\sigma$ is the scale of the noise in $\mathbf{T}$.
+
+
+
+### Gaussian Process Prediction
+
+The distribution of the function's value at a finite number of test inputs, $\mathbf{S}^{\*}$, is a multivariate normal distribution,
+$$
+	\begin{aligned}
+		\mathbf{T}^{\*}\_{i} \, | \, \mathbf{S}, \mathbf{T}, {\mathbf{S}^{\*}} \sim \mathcal{N}\bigl(&\mathbf{K}({\mathbf{S}^{\*}}, {\mathbf{S}}) \, \mathbf{K}({\mathbf{S}}, {\mathbf{S}})^{-1} \, \mathbf{T}\_i, \\\\[.5em] & \mathbf{K}({\mathbf{S}^{\*}}, {\mathbf{S}^{\*}}) - \mathbf{K}({\mathbf{S}^{\*}}, {\mathbf{S}}) \, \mathbf{K}({\mathbf{S}}, {\mathbf{S}})^{-1} \, \mathbf{K}({\mathbf{S}}, {\mathbf{S}^{\*}})\bigr),
+	\end{aligned}
+$$
+where $\mathbf{T}\_{i}$ ($\mathbf{T}^{\*}\_{i}$) are (test) outputs for the $i$-th output dimension. 
+
+
+### Gaussian Process Joint Distribution
+
+The joint distribution of the observed target values and the function values at the test locations can be written as:
+$$
+	\left.
+	\begin{pmatrix}
+		\mathbf{T}\_{i} \\\\
+		\mathbf{T}^{\*}\_{i}
+	\end{pmatrix}
+	\right| \, \mathbf{S}, {\mathbf{S}^{\*}}
+	\sim \mathcal{N}\left[
+		\mathbf{0},
+		\begin{pmatrix}
+			\mathbf{K}({\mathbf{S}}, {\mathbf{S}}) & \mathbf{K}({\mathbf{S}}, {\mathbf{S}^{\*}}) \\\\
+			\mathbf{K}({\mathbf{S}^{\*}}, {\mathbf{S}}) & \mathbf{K}({\mathbf{S}^{\*}}, {\mathbf{S}^{\*}})
+		\end{pmatrix}
+	\right].
+$$
+
+
+
+# Demonstration
+
+
+
+### What Is The Target Function in The VGP?
+
+Just for now, assume that the variational likelihood $q(\mathbf{z}| \mathbf{f}(\mathbf{\xi}))$ is a point mass distribution,
+$$
+  q(\mathbf{z}| \mathbf{f}(\mathbf{\xi})) = \delta\\!\left(\mathbf{z} - \mathbf{f}(\mathbf{\xi})\right).
+$$
+
+Then, with the GP, we want to approximate a function, $\mathbf{f}^\*$, that, when applied to draws $\mathbf{\xi} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$, produces samples $\mathbf{z} = {\mathbf{f}^\*(\mathbf{\xi})}$ that are distributed as the posterior $p(\mathbf{z}| \mathbf{X})$, i.e. effectively
+$$
+	p(\mathbf{z}| \mathbf{X}) = \int\_{\mathbb{R}^c} \delta\\!\left(\mathbf{z} - {\mathbf{f}^{\*}(\mathbf{\xi})}\right) \mathcal{N}(\xi; \mathbf{0}, \mathbf{I}) \, \mathrm{d}\mathbf{\xi}.
+$$
+
+
+
+### Explicit Construction of $\mathbf{f}^\*$ I
+
+<ol>
+	<li>
+		Integrate on both sides:
+		$$
+			\begin{aligned}
+				p(\mathbf{z}'| \mathbf{X}) & = \int\limits\_{\mathbb{R}^c} \delta\\!\left(\mathbf{z}' - {\mathbf{f}^{\*}(\mathbf{\xi}')}\right) \mathcal{N}(\xi'; \mathbf{0}, \mathbf{I}) \, \mathrm{d}\mathbf{\xi}', \\\\[2em]
+			  \int\limits\_{\\{{z'\_i} \le {f^{\*}\_{i}(\mathbf{\xi})}\\}\_i^{\phantom{\prime}}} \\!\\!\\!\\!\\!\\!\\! p(\mathbf{z}'| \mathbf{X}) \, \mathrm{d}\mathbf{z}' & = \int\limits\_{\mathbb{R}^c} \; \int\limits\_{\\{{z'\_i} \le {f^{\*}\_{i}(\mathbf{\xi})}\\}\_i^{\phantom{\prime}}} \\!\\!\\!\\!\\!\\!\\! \delta\\!\left(\mathbf{z}' - {\mathbf{f}^{\*}(\mathbf{\xi}')}\right) \mathrm{d}\mathbf{z}' \; \mathcal{N}(\xi'; \mathbf{0}, \mathbf{I}) \, \mathrm{d}\mathbf{\xi}'.
+		  \end{aligned}
+		$$
+	</li>
+	<li>
+	  The LHS is, by definition, the posterior cumulative density function, $P(\mathbf{z}|\mathbf{X})  \triangleq \mathbb{P}(\mathbf{z}' \le \mathbf{z}| \mathbf{X})$, evaluated at $\mathbf{z} = {\mathbf{f}^{\*}(\mathbf{\xi})}$.
+	</li>
+	<li>
+	  The inner integral over $\mathbf{z}'$ on the RHS reduces to the Heaviside function, $\Theta$, evaluated at $\mathbf{f}^{\*}(\mathbf{\xi}) - {\mathbf{f}^{\*}(\mathbf{\xi}')}$.
+	</li>
+</ol>
+
+
+
+### Explicit Construction of $\mathbf{f}^\*$ II
+
+<ol start="4">
+	<li>
+		The Heaviside function reduces the integration domain of the remaining integral over $\mathbf{\xi}'$ on the RHS:
+		$$
+			P\left({\mathbf{f}^{\*}(\mathbf{\xi})}|\mathbf{X}\right) \; = \\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\! \int\limits\_{\\{\mathbf{\xi}' : {f\_i^{\*}(\mathbf{\xi}')} \le {f\_i^{\*}(\mathbf{\xi})}, \, i=1,\ldots,d\\}} \\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\!\\! \mathcal{N}(\xi'; \mathbf{0}, \mathbf{I}) \; \mathrm{d}\mathbf{\xi}'.
+		$$
+	</li>
+	<li>
+		At this point, I wish I had evidence that allowed me to replace the integration domain with $\\{{\mathbf{\xi}'} : {\mathbf{\xi}'\_l} \le {\mathbf{\xi}\_l}, \, l=1,\ldots,c\\}$,
+		because then the RHS would reduce to the standard multivariate normal cumulative distribution function, $\Phi$, evaluated at $\mathbf{\xi}$. We would then have ${\mathbf{f}^{\*}(\mathbf{\xi})} = {\mathbf{P}^{-1}(\Phi(\mathbf{\xi}))} \triangleq {\\{\mathbf{z} : P(\mathbf{z}| \mathbf{X}) = \Phi(\mathbf{\xi})\\}}$. <br \> **But I don't have that evidence :(**
+	</li>
+</ol>
+</ol>
+
+
+
+### VGP Approximation Theorem
+
+*Let* $q\_{\,\mathrm{VGP}}^{\;}(\mathbf{z}; \mathbf{\theta})$ *denote the variational Gaussian process. Let* $p(\mathbf{z}| \mathbf{X})$ *be a posterior distribution with a finite number of latent variables and continuous quantile function (inverse cumulative distribution function),* $\mathbf{P}^{-1}(\mathbf{z})$*. Then there exists a sequence of parameters* $\mathbf{\theta}\_m$ *such that*
+$$
+  \lim\_{m\to\infty} \mathrm{KL}\left(q\_{\,\mathrm{VGP}}^{\;}(\mathbf{z}; {\mathbf{\theta}\_m})\\| p(\mathbf{z}\|\mathbf{X})\right) = 0.
+$$
+<br \>
+
+Every posterior with strictly positive density $p(\mathbf{z}| \mathbf{X})$ can be represented by a VGP (because those always have continuous quantile functions).
+
+
+
+### Black Box Inference
+
+Unfortunately, the ELBO,
+$$
+	\mathcal{L} = \,\\! \mathbb{E}\_{q\_{\,\mathrm{VGP}}^{\;}(\mathbf{z}; \mathbf{\theta})} \left[\log p(\mathbf{X}, \mathbf{z})\right] - \,\\! \mathbb{E}\_{q\_{\,\mathrm{VGP}}^{\;}(\mathbf{z}; \mathbf{\theta})} \left[\log q\_{\,\mathrm{VGP}}^{\;}(\mathbf{z}; \mathbf{\theta})\right],
+$$
+is not analytically tractable because of the log-density $\log q\_{\,\mathrm{VGP}}^{\;}(\mathbf{z}; \mathbf{\theta})$.
+
+The paper derives a weaker lower bound for the log-evidence,
+$$
+	\begin{aligned}
+  	\mathcal{\tilde{L}} \triangleq & \; \mathbb{E}\_{q\_{\,\mathrm{VGP}}^{\;}(\mathbf{z}; \mathbf{\theta})} \left[\log p(\mathbf{X}| \mathbf{z})\right] \\\\[.75em]
+  	& - \,\\! \mathbb{E}\_{q\_{\,\mathrm{VGP}}^{\;}(\mathbf{z}; \mathbf{\theta})} \left[\mathrm{KL}\bigl(q(\mathbf{z}| \mathbf{f}(\mathbf{\xi}))\\| p(\mathbf{z})\bigr) + \mathrm{KL}\bigl(q(\mathbf{\xi}, \mathbf{f})\\| r(\mathbf{\xi}, \mathbf{f}|\mathbf{z})\bigr)\right],
+  \end{aligned}
+$$
+and shows how to maximize that instead, where $r$ is an auxiliary distribution...
+
+
+
+...
+
+
+
+### Algorithm Complexity
+
+$$
+  \mathcal{O}(d + m^3 + L H^2),
+$$
+where:
+* $d$ is the number of latent variables,
+* $m$ is the size of the fake data set $\mathbf{\theta}$,
+* $L$ is the number of layers of a neural network leveraged for optimization with
+* $H$ the average hidden layer size.
+
+
+
+# How Do We Use This?
+
+
+
+### We Don't (For Now)
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr"><a href="https://twitter.com/dustinvtran">@dustinvtran</a> is Edward implementing the VGP from your ICLR 2016 paper? I looked through the code and couldn&#39;t find it anywhere.</p>&mdash; Torsten Scholak (@tscholak) <a href="https://twitter.com/tscholak/status/764125824861741072">August 12, 2016</a></blockquote> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr"><a href="https://twitter.com/tscholak">@tscholak</a> thanks for asking! its in a private branch at the moment, waiting for api changes to enable more expressive variational models</p>&mdash; Dustin Tran (@dustinvtran) <a href="https://twitter.com/dustinvtran/status/764165635974717440">August 12, 2016</a></blockquote> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
