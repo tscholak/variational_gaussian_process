@@ -13,15 +13,15 @@
 	   beyond the edge of the printed page, and prevents
 	   unnecessary background images from printing */
 	html {
-	  background: #000;
-	  background-color: #000;
+	  background: #fff;
+	  background-color: #fff;
 		width: auto;
 		height: auto;
 		overflow: visible;
 	}
 	body {
-	  background: #000;
-	  background-color: #000;
+	  background: #fff;
+	  background-color: #fff;
 		font-size: 16pt;
 		width: auto;
 		height: auto;
@@ -48,8 +48,8 @@
 	   Consider using a serif font for readability. */
 	body, p, td, li, div {
 		font-size: 16pt !important;
-    font-family: "charterregular", serif;
-    color: #fff5df;
+    font-family: "PragmataPro", serif;
+    color: #000;
 	}
 
 	/* SECTION 4: Set heading font face, sizes, and color.
@@ -57,8 +57,8 @@
 	   Perhaps use a large sans-serif for distinction. */
 	h1, h2, h3, h4, h5, h6 {
 		height: auto;
-	  color: #fef200;
-	  font-family: "Fira Sans", sans-serif;
+	  color: #000;
+	  font-family: "PragmataPro", sans-serif;
 	  font-weight: 700;
 	  line-height: 1.2;
 	  letter-spacing: normal;
@@ -79,7 +79,7 @@
 	   the URL to the end of the link for usability. */
 	a:link,
 	a:visited {
-		color: #0cbff2 !important;
+		color: #000 !important;
   	text-decoration: none;
 	}
 	/*
@@ -110,7 +110,7 @@
 	}
 	.reveal pre code {
 		padding: 20px;
-		border: 1px solid #ddd;
+		border: none;
 	}
 	.reveal blockquote {
 		margin: 20px 0;
@@ -193,8 +193,9 @@
 	.reveal section img {
 		display: block;
 		margin: 15px 0px;
-		background: rgba(255,255,255,1);
-		border: 1px solid #666;
+		background: #263238;
+		background-color: #263238;
+		border: none;
 		box-shadow: none;
 	}
 
